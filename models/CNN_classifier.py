@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
+from util import entropy_wrapper
 
 class CNN(nn.Module):
    
@@ -18,6 +20,7 @@ class CNN(nn.Module):
         self.dropout2 = nn.Dropout2d(0.5)
         self.fc1 = nn.Linear(9216, 128)
         self.fc2 = nn.Linear(128, y_dim)
+        self.y_dim = y_dim
         
     def forward(self, x):
         """
@@ -40,11 +43,8 @@ class CNN(nn.Module):
         out = self.fc2(x)
         prob_out = F.softmax(out)
 
-        # entropy layer
         # FIXME: this is a band-aid to put on wrapper
-        normalized_entropy = torch.sum(-prob_out * torch.log(prob_out), 1) / torch.log(2)
-        entropy_prob_out = torch.hstack((normalized_entropy, 1-normalized_entropy))
-        
-        # return prob_out, out
+        entropy_prob_out = entropy_wrapper(prob_out)
 
+        # return prob_out, out
         return entropy_prob_out, None

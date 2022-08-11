@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
+from util import entropy_wrapper
 
 class UnfairClassifierParametric(nn.Module):
    
@@ -23,9 +25,8 @@ class UnfairClassifierParametric(nn.Module):
         pbig = x[:, 1]*(torch.sigmoid(self.alpha*(x[:, 0] - 0.5))) + (1-x[:, 1])*(0.5)
         prob_out = torch.hstack((pbig, 1-pbig))
 
-        # entropy layer
         # FIXME: this is a band-aid to put on wrapper
-        normalized_entropy = torch.sum(-prob_out * torch.log(prob_out), 1) / torch.log(2)
-        entropy_prob_out = torch.hstack((normalized_entropy, 1-normalized_entropy))
-        
+        entropy_prob_out = entropy_wrapper(prob_out)
+
+        # return prob_out, out
         return entropy_prob_out, None

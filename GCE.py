@@ -8,7 +8,7 @@ import loss_functions
 import causaleffect
 import os
 from util import *
-from load_mnist import *
+#from load_mnist import *
 
 class GenerativeCausalExplainer:
 

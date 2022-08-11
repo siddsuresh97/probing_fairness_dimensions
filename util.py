@@ -35,7 +35,7 @@ def load_mnist_idx(data_type):
            X = trX[50000:60000,:,:,:]
            y = trY[50000:60000].astype(np.int)
        idxUse = np.arange(0,y.shape[0])
-       seed = 547
+       seed = np.random.randint(2**32-1)
        np.random.seed(seed)
        np.random.shuffle(X)
        np.random.seed(seed)
@@ -47,6 +47,9 @@ def load_mnist_idx(data_type):
    
 def load_mnist_classSelect(data_type,class_use,newClass):
     
+    # X is numpy (nsamp,nrows,ncols,nchans)
+    # Y is numpy (nsamp,)
+    # idx is numpy (nsamp,)
     X, Y, idx = load_mnist_idx(data_type)
     class_idx_total = np.zeros((0,0))
     Y_use = Y
@@ -115,7 +118,7 @@ def get_data_loader(dataset_type):
 
     if dataset_type == 'mnist':
         return load_mnist_classSelect
-    elif dataset_type == 'circles_parametric'
+    elif dataset_type == 'circles_parametric':
         return load_circles_parametric
 
 
@@ -150,4 +153,18 @@ def get_new_gce(gce_type, K, L, c_dim, x_dim, classifier, device):
     decoder.apply(weights_init_normal)
     gce = GenerativeCausalExplainer(classifier, decoder, encoder, device)
     return gce
+
+def entropy_wrapper(prob_out):
+    """
+    Inputs:
+        prob_out: nsamp x nclass Tensor
+    Outputs:
+        entropy_prob_out: nsamp x 2 Tensor, evaluated as entropy of prob_out, converted into probability vector
+    """
+    normalized_entropy = torch.sum(-prob_out * torch.log(prob_out), 1).div(np.log(prob_out.shape[1]))
+    normalized_entropy = normalized_entropy[:, None]
+    entropy_prob_out = torch.hstack((normalized_entropy, 1-normalized_entropy))
+
+    return entropy_prob_out
+
         

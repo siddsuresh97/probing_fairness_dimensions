@@ -80,7 +80,11 @@ x_dim = nrow*ncol
 # --- load classifier ---
 # TODO: make compatible with non-CNN
 classifier_object = util.get_classifier(classifier_type)
+
+print('Initializing classifier...')
 classifier = classifier_object(len(data_classes)).to(device)
+print('Initialized!')
+
 checkpoint = torch.load('%s/model.pt' % classifier_path, map_location=device)
 classifier.load_state_dict(checkpoint['model_state_dict_classifier'])
 
